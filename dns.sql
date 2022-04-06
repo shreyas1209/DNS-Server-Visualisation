@@ -1,0 +1,35 @@
+CREATE TABLE IF NOT EXISTS rootNameServer (
+	domainName CHAR(5) PRIMARY KEY, 
+    ipAddress1 VARCHAR(16) NOT NULL,
+    domainType VARCHAR(15),
+    organisation VARCHAR(30)
+);
+
+CREATE TABLE IF NOT EXISTS TLDNameServer (
+	nameServer VARCHAR(20) NOT NULL,
+    ipAddress2 VARCHAR(16) PRIMARY KEY, 
+    location VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS ANS (
+	ipv4 VARCHAR(16) PRIMARY KEY,
+    urlName VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS rootTLD(
+	domainName CHAR(5),
+    nameServer VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS TLDANS(
+	ipAddress2 VARCHAR(16) NOT NULL,
+	urlName VARCHAR(20) NOT NULL
+);
+
+
+
+
+
+
+
+
