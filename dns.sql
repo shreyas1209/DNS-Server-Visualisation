@@ -1,9 +1,8 @@
-drop table rootNameServer ;
-drop table TLDNameServer;
-drop table ANS;
-drop table rootTLD;
-drop table TLDANS;
-
+DROP TABLE IF EXISTS rootNameServer ;
+DROP TABLE IF EXISTS TLDNameServer;
+DROP TABLE IF EXISTS ANS;
+DROP TABLE IF EXISTS rootTLD;
+DROP TABLE IF EXISTS TLDANS;
 CREATE TABLE IF NOT EXISTS rootNameServer (
 	domainName VARCHAR(5) PRIMARY KEY, 
     ipAddress1 VARCHAR(16) NOT NULL,
@@ -60,11 +59,3 @@ INSERT INTO ans VALUES
 ("11.345.2.3","www.bits-pilani.in"),
 ("456.33.56.2","http://berkeley.edu"),
 ("123.56.44.234","www.khanacademy.org");
-
-
-
-
-
-
-
-
