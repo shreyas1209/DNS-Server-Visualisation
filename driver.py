@@ -7,10 +7,11 @@ try:
                                          )
     if myDB.is_connected():
         db_Info = myDB.get_server_info()
+
         print("Connected to MySQL Server version ", db_Info)
         cursor = myDB.cursor()
-        cursor.execute ('CREATE DATABASE IF NOT EXISTS dnsServer')
-        cursor.execute('USE dnsServer;')
+        #cursor.execute ('CREATE DATABASE IF NOT EXISTS dnsServer')
+        #cursor.execute('USE dnsServer;')
 
         with open('dns.sql', 'r') as f:
             sqlScript = f.read().split(";\n")
@@ -22,8 +23,8 @@ try:
                 cursor.execute(sqlScript[i])
                 print(sqlScript[i])
 
-        url = "wikipedia.org"
-        cursor.execute('SELECT * FROM rootnameserver WHERE domainName ="'+url[-4: ]+ '";')
+        url = input("Enter URL:")
+        cursor.execute('SELECT * FROM rootnameserver WHERE tldName ="'+url[-4: ]+ '";')
         record = cursor.fetchone()
         print(record)
 
