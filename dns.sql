@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS rootNameServer;
 DROP TABLE IF EXISTS org;
 DROP TABLE IF EXISTS TLDNameServer;
 DROP TABLE IF EXISTS AuthoritativeNameServer;
+DROP TABLE IF EXISTS Cache;
 
 CREATE TABLE IF NOT EXISTS org(
     orgName VARCHAR(100) PRIMARY KEY,
@@ -36,6 +37,12 @@ CREATE TABLE IF NOT EXISTS AuthoritativeNameServer (
     FOREIGN KEY(ansIP) REFERENCES TLDNameServer(ansIP)
 );
 
+CREATE TABLE IF NOT EXISTS Cache(
+    urlName VARCHAR(20) NOT NULL,
+    ipv4 VARCHAR(16) PRIMARY KEY,
+    tldIP VARCHAR(16),
+    ansIP VARCHAR(16) 
+);
 
 INSERT INTO org VALUES
 ("NationalInternetExchangeofIndia", "country"),
