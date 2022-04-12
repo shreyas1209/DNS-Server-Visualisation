@@ -4,20 +4,20 @@ CREATE DATABASE IF NOT EXISTS dnsServer;
 USE dnsServer;
 
 DROP TABLE IF EXISTS rootNameServer;
-DROP TABLE IF EXISTS organization;
+DROP TABLE IF EXISTS org;
 DROP TABLE IF EXISTS TLDNameServer;
 DROP TABLE IF EXISTS AuthoritativeNameServer;
 
-CREATE TABLE IF NOT EXISTS organization(
-    organization VARCHAR(100) PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS org(
+    orgName VARCHAR(100) PRIMARY KEY,
     domType  VARCHAR(50)
 );
 
 CREATE TABLE IF NOT EXISTS rootNameServer (
     tldName VARCHAR(5),
     tldIP VARCHAR(16) PRIMARY KEY,
-    organization VARCHAR(100),
-    FOREIGN KEY(organization) REFERENCES organization(organization)
+    orgName VARCHAR(100),
+    FOREIGN KEY(orgName) REFERENCES org(orgName)
 );
 
 
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS AuthoritativeNameServer (
 );
 
 
-INSERT INTO organization VALUES
+INSERT INTO org VALUES
 ("NationalInternetExchangeofIndia", "country"),
 ("PublicInterestRegistry", "generic"),
 ("EDUCAUSE","sponsored");
@@ -58,3 +58,5 @@ INSERT INTO AuthoritativeNameServer VALUES
 ("156.154.101.20","11.345.2.3","www.bits-pilani.in"),
 ( "192.26.92.30","456.33.56.2","http://berkeley.edu"),
 ("199.19.54.1","123.56.44.234","www.khanacademy.org");
+
+
