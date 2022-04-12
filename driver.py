@@ -66,14 +66,15 @@ def iterativeDNSResolver(url,loc):
     cursor.execute('SELECT * FROM Cache;')
     records = cursor.fetchall()
     print(records)
+    return finalIP
 
 def recursiveDNSResolution(url,location):
     splitURL = url.split('.')
-    #cursor.execute('SELECT * FROM Cache WHERE urlName = "'+url+'";')
-    #records = cursor.fetchall()
-    #if(not records):
-    #    print("Cannot find IP in Cache Server!!!Now looking in Root Name Server")
-    recursiveRNSCall(splitURL[-1],splitURL[-2],url)
+    cursor.execute('SELECT * FROM Cache WHERE urlName = "'+url+'";')
+    records = cursor.fetchall()
+    if(not records):
+       print("Cannot find IP in Cache Server!!!Now looking in Root Name Server")
+    return recursiveRNSCall(splitURL[-1],splitURL[-2],url)
         
 
 def recursiveRNSCall(tld,dom,url):
@@ -88,7 +89,7 @@ def recursiveRNSCall(tld,dom,url):
     print("IP Address of TLD Server: "+record[2])
     print("--------------------------------------")
     print("Now Querying the TLD Server of TLD "+record[1]+".....")
-    recursiveTLDServerCall(record[2],dom,url)
+    return recursiveTLDServerCall(record[2],dom,url)
     
 
 def recursiveTLDServerCall(tldIP,dom,url):
@@ -102,7 +103,7 @@ def recursiveTLDServerCall(tldIP,dom,url):
         print("IP Address of Authoritative Name Server: "+row[2])
         print("Location of the TLD Name Server: "+row[3])
         print("--------------------------------------")
-    recursiveANSServerCall(records[0][2],dom,url)
+    return recursiveANSServerCall(records[0][2],dom,url)
 
 def recursiveANSServerCall(ansIP,dom,url):
     print(ansIP)
@@ -120,53 +121,57 @@ def recursiveANSServerCall(ansIP,dom,url):
     cursor.execute('INSERT INTO Cache VALUES ("'+url+'","'+records[0][1]+'");')
     cursor.execute('SELECT * FROM Cache;')
     records = cursor.fetchall()
-    print(records)
-try:
-    myDB = mysql.connector.connect(host = 'localhost',
-                                         username = 'scott',
-                                         password = 'tiger',
-                                         autocommit=True
-                                         )
-    if myDB.is_connected():
-        db_Info = myDB.get_server_info()
+    return records[0][1]
 
-        print("Connected to MySQL Server version ", db_Info)
-        cursor = myDB.cursor()
+def connect():
+    try:
+        global myDB
+        myDB = mysql.connector.connect(host = 'localhost',
+                                            username = 'SCOTT',
+                                            password = 'TIGER',
+                                            autocommit=True
+                                            )
+        if myDB.is_connected():
+            db_Info = myDB.get_server_info()
 
-        with open('dns.sql', 'r') as f:
-            sqlScript = f.read().split(";\n")
-            for i in range(0,len(sqlScript)):
-                if(sqlScript[i] not in ('','\n')):
-                    sqlScript[i]+=';'
-            for i in range(0,len(sqlScript)):
-                cursor.execute(sqlScript[i])
+            print("Connected to MySQL Server version ", db_Info)
+            global cursor
+            cursor = myDB.cursor()
 
-    url = input("Enter URL: ")
+            with open('dns.sql', 'r') as f:
+                sqlScript = f.read().split(";\n")
+                for i in range(0,len(sqlScript)):
+                    if(sqlScript[i] not in ('','\n')):
+                        sqlScript[i]+=';'
+                for i in range(0,len(sqlScript)):
+                    cursor.execute(sqlScript[i])
 
-    result=checkCache(url)
-    if result=="empty":
-        type=input("Enter r for Recursive and i for iterative ")
-        if type in ["r","R"]:
-            recursiveDNSResolution(url,'India')
-            
-        else: 
-            iterativeDNSResolver(url,'India')
+        # url = input("Enter URL: ")
+        #print(url)
+        # result=checkCache(url)
+        # if result=="empty":
+        #     type=input("Enter r for Recursive and i for iterative ")
+        #     if type in ["r","R"]:
+        #         recursiveDNSResolution(url,'India')
+                
+        #     else: 
+        #         iterativeDNSResolver(url,'India')
 
-    # parsedURL= url.split('.')
-    # #cursor.callproc("RNSfunc", [".org"])
-    # cursor.execute("CALL RNSfunc('." +parsedURL[-1]+"');")
-    # record = cursor.fetchone()
-    # print(record)
-    
+        # # parsedURL= url.split('.')
+        # # #cursor.callproc("RNSfunc", [".org"])
+        # # cursor.execute("CALL RNSfunc('." +parsedURL[-1]+"');")
+        # # record = cursor.fetchone()
+        # # print(record)
+        
 
 
-except mysql.connector.Error as e:
-    print("Error while connecting to MySQL", e)
-finally:
-    if myDB.is_connected():
-        cursor.close()
-        myDB.close()
-        print("MySQL connection is closed")
+    except mysql.connector.Error as e:
+        print("Error while connecting to MySQL", e)
+def close():
+        if myDB.is_connected():
+            cursor.close()
+            myDB.close()
+            print("MySQL connection is closed")
 
 
 
