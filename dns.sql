@@ -59,4 +59,5 @@ INSERT INTO AuthoritativeNameServer VALUES
 ( "192.26.92.30","456.33.56.2","http://berkeley.edu"),
 ("199.19.54.1","123.56.44.234","www.khanacademy.org");
 
-
+CREATE PROCEDURE RNSfunc(IN tld varchar(5))
+	SELECT * FROM rootNameServer where tldName=tld;
