@@ -1,5 +1,16 @@
 import mysql.connector
 
+
+def recursiveDNSResolution(url,location):
+    splitURL = url.split('.')
+    print("\nAT RESOLVER: Checking for ipv4 for url:"+url+"in Cache server!!!")
+    cursor.execute('SELECT * FROM Cache WHERE urlName = "'+url+'";')
+    records = cursor.fetchall()
+    if(not records):
+        print("Cannot find IP in Cache Server!!!Now looking in Root Name Server")
+        recursiveRNSCall(splitURL[-1])
+        
+
 def recursiveRNSCall(tld):
     print("\nChecking in Root Name Server!!!")
     cursor.execute('SELECT * FROM rootNameServer INNER JOIN org USING(orgName) WHERE tldName =".'+tld+'";')
@@ -30,16 +41,6 @@ def recursiveTLDServerCall(tldIP):
         print("--------------------------------------")
 
 
-
-def recursiveDNSResolution(url,location):
-    splitURL = url.split('.')
-    print("\nAT RESOLVER: Checking for ipv4 for url:"+url+"in Cache server!!!")
-    cursor.execute('SELECT * FROM Cache WHERE urlName = "'+url+'";')
-    records = cursor.fetchall()
-    if(not records):
-        print("Cannot find IP in Cache Server!!!Now looking in Root Name Server")
-        recursiveRNSCall(splitURL[-1])
-        
 
 try:
     myDB = mysql.connector.connect(host = 'localhost',
