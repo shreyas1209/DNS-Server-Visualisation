@@ -33,8 +33,7 @@ CREATE TABLE IF NOT EXISTS TLDNameServer (
 CREATE TABLE IF NOT EXISTS AuthoritativeNameServer (
     ansIP VARCHAR(16) NOT NULL,
 	ipv4 VARCHAR(16) PRIMARY KEY,
-    urlName VARCHAR(20) NOT NULL,
-    FOREIGN KEY(ansIP) REFERENCES TLDNameServer(ansIP)
+    urlName VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Cache(
@@ -55,16 +54,15 @@ INSERT INTO rootNameServer VALUES
 (".edu","345.22.45.993","EDUCAUSE");
 
 INSERT INTO tldNameServer VALUES 
-("a0.org.afilias-nst.info", "45.333.233.12", "199.19.56.1", "southPacific"), 
+("a0.org.afilias-nst.info", "45.333.233.12", "192.29.56.5", "southPacific"), 
 ("b0.org.afilias-nst.org", "45.333.233.12", "199.19.54.1", "us" ),
-("ns6.registry.in","232.154.567.45", "156.154.101.20", "india" ),
-("c.edu-servers.net","345.22.45.993", "192.26.92.30", "africa"),
+("ns6.registry.in","232.154.567.45", "156.154.101.34", "india" ),
+("c.edu-servers.net","345.22.45.993", "192.26.92.3200", "africa"),
 ("d.edu-servers.net","345.22.45.993", "192.31.80.30", "china");
 
 INSERT INTO AuthoritativeNameServer VALUES 
-("156.154.101.20","11.345.2.3","www.bits-pilani.in"),
-( "192.26.92.30","456.33.56.2","http://berkeley.edu"),
-("199.19.54.1","123.56.44.234","www.khanacademy.org");
-
-CREATE PROCEDURE RNSfunc(IN tld varchar(5))
-	SELECT * FROM rootNameServer where tldName=tld;
+("156.154.101.34","11.345.2.3","bits-pilani"),
+( "192.26.92.30","456.33.56.22","berkeley"),
+( "192.26.92.3200","456.33.56.245","berkeley"),
+("199.19.54.1","123.56.44.14","khanacademy"),
+("192.29.56.5","123.56.44.24","khanacademy");
