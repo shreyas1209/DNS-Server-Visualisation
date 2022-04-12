@@ -1,5 +1,17 @@
+from linecache import checkcache
 import mysql.connector
 
+def checkCache(url):
+    print("\nChecking for ipv4 for url: "+url+" in Cache server...")
+    cursor.execute('SELECT * FROM Cache WHERE urlName = "'+url+'";')
+    records = cursor.fetchall() 
+    if(records):
+        print("\nRecord has been found in the Cache! ")
+        print("\nThe IP Address is: "+records[0][1])
+        return "found"
+    else:
+        print("Cache is empty ")
+        return "empty"
 def iterativeANSServerCall(domainName, ansIP):
     print("\nNow checking in the ANS server!")
     cursor.execute('SELECT * FROM AuthoritativeNameServers WHERE ansIP = "'+ansIP+'" AND urlName = "'+domainName+'";')
@@ -41,31 +53,30 @@ def iterativeRNSCall(topLevelDomain):
 def iterativeDNSResolver(url,loc):
     print("In the DNS Resolver! ")
     splitURL = url.split('.')
-    print("\nAT RESOLVER: Checking for ipv4 for url:"+url+"in Cache server!!!")
-    cursor.execute('SELECT * FROM Cache WHERE urlName = "'+url+'";')
+    print("Cannot find IP in Cache Server!!! Now looking in Root Name Server")
+    tldIP=iterativeRNSCall(splitURL[-1])
+    print("Back in DNS Resolver! ")
+    ansIP=iterativeTLDServerCall(tldIP,loc)
+    print("Back in the DNS Resolver! ")
+    finalIP=iterativeANSServerCall(splitURL[-2],ansIP)
+    print("The final IP address is "+finalIP)
+
+    #adding to cache
+    cursor.execute('INSERT INTO Cache VALUES ("'+url+'","'+finalIP+'");')
+    cursor.execute('SELECT * FROM Cache;')
     records = cursor.fetchall()
-    #checking cache 
-    if(records):
-        print(records)
-    else:
-        print("Cannot find IP in Cache Server!!! Now looking in Root Name Server")
-        tldIP=iterativeRNSCall(splitURL[-1])
-        print("Back in DNS Resolver! ")
-        ansIP=iterativeTLDServerCall(tldIP,loc)
-        print("Back in the DNS Resolver! ")
-        finalIP=iterativeANSServerCall(splitURL[-2],ansIP)
-        print("The final IP address is "+finalIP)
+    print(records)
 
 def recursiveDNSResolution(url,location):
     splitURL = url.split('.')
-    cursor.execute('SELECT * FROM Cache WHERE urlName = "'+url+'";')
-    records = cursor.fetchall()
-    if(not records):
-        print("Cannot find IP in Cache Server!!!Now looking in Root Name Server")
-        recursiveRNSCall(splitURL[-1],splitURL[-2])
+    #cursor.execute('SELECT * FROM Cache WHERE urlName = "'+url+'";')
+    #records = cursor.fetchall()
+    #if(not records):
+    #    print("Cannot find IP in Cache Server!!!Now looking in Root Name Server")
+    recursiveRNSCall(splitURL[-1],splitURL[-2],url)
         
 
-def recursiveRNSCall(tld,dom):
+def recursiveRNSCall(tld,dom,url):
     print("\nChecking in Root Name Server!!!")
     cursor.execute('SELECT * FROM rootNameServer INNER JOIN org USING(orgName) WHERE tldName =".'+tld+'";')
     record = cursor.fetchone()
@@ -77,10 +88,10 @@ def recursiveRNSCall(tld,dom):
     print("IP Address of TLD Server: "+record[2])
     print("--------------------------------------")
     print("Now Querying the TLD Server of TLD "+record[1]+".....")
-    recursiveTLDServerCall(record[2],dom)
+    recursiveTLDServerCall(record[2],dom,url)
     
 
-def recursiveTLDServerCall(tldIP,dom):
+def recursiveTLDServerCall(tldIP,dom,url):
     print("\nNow Checking in TLD Name Server!!!")
     cursor.execute('SELECT * FROM tldNameServers WHERE tldIP = "'+tldIP+'";')
     records = cursor.fetchall()
@@ -91,9 +102,9 @@ def recursiveTLDServerCall(tldIP,dom):
         print("IP Address of Authoritative Name Server: "+row[2])
         print("Location of the TLD Name Server: "+row[3])
         print("--------------------------------------")
-    recursiveANSServerCall(records[0][2],dom)
+    recursiveANSServerCall(records[0][2],dom,url)
 
-def recursiveANSServerCall(ansIP,dom):
+def recursiveANSServerCall(ansIP,dom,url):
     print(ansIP)
     print("\nNow checking in Authoritative Name Server!!!!")
     cursor.execute('SELECT * FROM AuthoritativeNameServers WHERE ansIP = "'+ansIP+'" AND urlName = "'+dom+'";')
@@ -106,11 +117,14 @@ def recursiveANSServerCall(ansIP,dom):
         print("--------------------------------------")
 
     print("\n IP Address of given url is :"+records[0][1])
-
+    cursor.execute('INSERT INTO Cache VALUES ("'+url+'","'+records[0][1]+'");')
+    cursor.execute('SELECT * FROM Cache;')
+    records = cursor.fetchall()
+    print(records)
 try:
     myDB = mysql.connector.connect(host = 'localhost',
-                                         username = 'SCOTT',
-                                         password = 'TIGER',
+                                         username = 'scott',
+                                         password = 'tiger',
                                          autocommit=True
                                          )
     if myDB.is_connected():
@@ -128,10 +142,17 @@ try:
                 cursor.execute(sqlScript[i])
 
     url = input("Enter URL: ")
-    recursiveDNSResolution(url,'India')
-    iterativeDNSResolver(url,'India')
-    # parsedURL= url.split('.')
 
+    result=checkCache(url)
+    if result=="empty":
+        type=input("Enter r for Recursive and i for iterative ")
+        if type in ["r","R"]:
+            recursiveDNSResolution(url,'India')
+            
+        else: 
+            iterativeDNSResolver(url,'India')
+
+    # parsedURL= url.split('.')
     # #cursor.callproc("RNSfunc", [".org"])
     # cursor.execute("CALL RNSfunc('." +parsedURL[-1]+"');")
     # record = cursor.fetchone()
@@ -146,7 +167,6 @@ finally:
         cursor.close()
         myDB.close()
         print("MySQL connection is closed")
-
 
 
 
