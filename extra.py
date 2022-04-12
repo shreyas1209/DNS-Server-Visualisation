@@ -52,4 +52,8 @@ def iterativeDNSResolver(url,loc):
         ansIP=iterativeTLDServerCall(tldIP,loc)
         print("Back in the DNS Resolver! ")
         finalIP=iterariveANSServerCall(splitURL[1],ansIP)
+<<<<<<< HEAD
         print("The final IP address is "+finalIP)
+=======
+        print("The final IP address is "+finalIP)
+>>>>>>> 22265f8792ecde65c0ff0dc8dd27c69a64539685
