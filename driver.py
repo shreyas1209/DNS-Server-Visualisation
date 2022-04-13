@@ -1,6 +1,10 @@
 from linecache import checkcache
 import mysql.connector
 
+def getCache(url):
+    cursor.execute('SELECT * FROM Cache WHERE urlName = "'+url+'";')
+    records = cursor.fetchall()
+    return records[0][1]
 def checkCache(url):
     print("\nChecking for ipv4 for url: "+url+" in Cache server...")
     cursor.execute('SELECT * FROM Cache WHERE urlName = "'+url+'";')
@@ -127,8 +131,8 @@ def connect():
     try:
         global myDB
         myDB = mysql.connector.connect(host = 'localhost',
-                                            username = 'SCOTT',
-                                            password = 'TIGER',
+                                            username = 'scott',
+                                            password = 'tiger',
                                             autocommit=True
                                             )
         if myDB.is_connected():
@@ -172,6 +176,5 @@ def close():
             cursor.close()
             myDB.close()
             print("MySQL connection is closed")
-
 
 
