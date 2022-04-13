@@ -86,3 +86,115 @@ INSERT INTO AuthoritativeNameServers VALUES
 ("192.5.6.30","383.25.2.4","slideshare"),
 ("192.33.14.30","383.25.234.4","slideshare"),
 ("192.26.92.30","383.25.337.4","slideshare");
+
+DROP PROCEDURE IF EXISTS iterative_resolver;
+DROP PROCEDURE IF EXISTS iter_ans;
+DROP PROCEDURE IF EXISTS iter_tld;
+DROP PROCEDURE IF EXISTS iter_rns;
+DROP PROCEDURE IF EXISTS recursive_resolver;
+DROP PROCEDURE IF EXISTS rec_rns;
+DROP PROCEDURE IF EXISTS rec_tld;
+DROP PROCEDURE IF EXISTS rec_ans;
+
+DELIMITER $$
+CREATE DEFINER =`scott`@`localhost` PROCEDURE 
+`iterative_resolver`(IN tld varchar(5), IN dom VARCHAR(20),IN loc VARCHAR(15))
+ READS SQL DATA
+ DETERMINISTIC
+ SQL SECURITY INVOKER
+BEGIN
+DECLARE tld_IP varchar(16);
+DECLARE ans_IP varchar(16);
+DECLARE ipv4 varchar(16);
+call iter_rns(tld, tld_IP);
+call iter_tld(tld_IP,loc,ans_IP);
+call iter_ans(dom, ans_IP);
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER =`scott`@`localhost` PROCEDURE 
+`iter_rns`(IN tld VARCHAR(5), OUT tld_IP VARCHAR(16))
+ READS SQL DATA
+ DETERMINISTIC
+ SQL SECURITY INVOKER
+BEGIN
+select tldIP INTO tld_IP from rootNameServer where tldName=tld;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER =`scott`@`localhost` PROCEDURE 
+`iter_tld`(IN tld_IP VARCHAR(16), IN loc VARCHAR(15), OUT ans_IP VARCHAR(16))
+ READS SQL DATA
+ DETERMINISTIC
+ SQL SECURITY INVOKER
+BEGIN
+select ansIP into ans_IP from TLDNameServers where tldIP=tld_IP AND location=loc;
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER =`scott`@`localhost` PROCEDURE 
+`iter_ans`(IN dom VARCHAR(20),IN ans_IP VARCHAR(16))
+ READS SQL DATA
+ DETERMINISTIC
+ SQL SECURITY INVOKER
+BEGIN
+select ipv4 from AuthoritativeNameServers where (ansIP=ans_IP AND urlName=dom);
+END$$
+DELIMITER ;
+call iterative_resolver(".org","khanacademy","us");
+
+DELIMITER $$
+CREATE DEFINER =`scott`@`localhost` PROCEDURE 
+`recursive_resolver`(IN tld varchar(5), IN dom VARCHAR(20),IN loc VARCHAR(15))
+ READS SQL DATA
+ DETERMINISTIC
+ SQL SECURITY INVOKER
+BEGIN
+declare tldIP varchar(16);
+call rec_rns(tld, dom, loc, tldIP);
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER =`scott`@`localhost` PROCEDURE 
+`rec_rns`(IN tld varchar(5), IN dom VARCHAR(20),IN loc VARCHAR(15), OUT tld_IP varchar(16))
+ READS SQL DATA
+ DETERMINISTIC
+ SQL SECURITY INVOKER
+BEGIN
+declare ans_IP varchar(16);
+select tldIP into tld_IP from rootNameServer where tldName=tld;	
+call rec_tld(tld_IP,dom, loc, ans_IP);
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER =`scott`@`localhost` PROCEDURE 
+`rec_tld`(IN tld_IP varchar(16), IN dom VARCHAR(20), IN loc VARCHAR(15), OUT ans_IP varchar(16))
+ READS SQL DATA
+ DETERMINISTIC
+ SQL SECURITY INVOKER
+BEGIN
+select ansIP into ans_IP from TLDNameServers where tldIP=tld_IP AND location=loc;	
+call rec_ans(ans_IP, dom);
+END$$
+DELIMITER ;
+
+DELIMITER $$
+CREATE DEFINER =`scott`@`localhost` PROCEDURE 
+`rec_ans`(IN ans_IP varchar(16), IN dom VARCHAR(20))
+ READS SQL DATA
+ DETERMINISTIC
+ SQL SECURITY INVOKER
+BEGIN
+select ipv4 from AuthoritativeNameServers where urlName=dom;	
+call rec_ans(ans_IP, dom);
+END$$
+DELIMITER ;
+
+
+
+
