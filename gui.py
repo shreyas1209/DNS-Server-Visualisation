@@ -15,10 +15,14 @@ connect()
 def submit():
     url = urlINP.get()
     loc = locINP.get()
-    if(radio.get()==1):
-        ip = iterativeDNSResolver(url,loc)
+    result=checkCache(url)
+    if(result=="empty"):
+        if(radio.get()==1):
+            ip = iterativeDNSResolver(url,loc)
+        else:
+            ip = recursiveDNSResolution(url,loc)
     else:
-        ip = recursiveDNSResolution(url,loc)
+        ip=getCache(url)
     selectLabel.config(text = "IP ADDRESS: "+ip)
 
 
