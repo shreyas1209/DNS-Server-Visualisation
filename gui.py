@@ -19,9 +19,9 @@ try:
             result=checkCache(url)
             if(result=="empty"):
                 if(radio.get()==1):
-                    ip = iterativeDNSResolver(url,loc)       
-                else:
-                    ip = recursiveDNSResolution(url,loc)
+                    ip = recursiveDNSResolution(url,loc)      
+                elif (radio.get() == 2):
+                    ip = iterativeDNSResolver(url,loc)
             else:
                 ip=getCache(url)
             selectLabel.config(text = "IP ADDRESS: "+ip)
@@ -46,8 +46,8 @@ try:
 
     lbl = Label(root,text = "Select mode of querying:").place(x = 200, y = 130)
     
-    R1 = Radiobutton(root,text = "Iterative",variable = radio,value = 1).place(x = 210,y  = 160 )
-    R2 = Radiobutton(root,text = "Recursive",variable = radio,value = 2).place(x = 210,y  = 180 )
+    R1 = Radiobutton(root,text = "Recursive",variable = radio,value = 1).place(x = 210,y  = 160 )
+    R2 = Radiobutton(root,text = "Iterative",variable = radio,value = 2).place(x = 210,y  = 180 )
 
     button = Button(root, text="Visualise",command =submit ).place(x = 350 , y = 210)
 

@@ -55,29 +55,36 @@ def iterativeRNSCall(topLevelDomain):
     return record[2]
 
 def iterativeDNSResolver(url,loc):
-    print("In the DNS Resolver! ")
-    splitURL = url.split('.')
-    print("Cannot find IP in Cache Server!!! Now looking in Root Name Server")
-    tldIP=iterativeRNSCall(splitURL[-1])
-    print("Back in DNS Resolver! ")
-    ansIP=iterativeTLDServerCall(tldIP,loc)
-    print("Back in the DNS Resolver! ")
-    finalIP=iterativeANSServerCall(splitURL[-2],ansIP)
-    print("The final IP address is "+finalIP)
+    try:
+        print("In the DNS Resolver! ")
+        splitURL = url.split('.')
+        print("Cannot find IP in Cache Server!!! Now looking in Root Name Server")
+        tldIP=iterativeRNSCall(splitURL[-1])
+        print("Back in DNS Resolver! ")
+        ansIP=iterativeTLDServerCall(tldIP,loc)
+        print("Back in the DNS Resolver! ")
+        finalIP=iterativeANSServerCall(splitURL[-2],ansIP)
+        print("The final IP address is "+finalIP)
 
     #adding to cache
-    cursor.execute('INSERT INTO Cache VALUES ("'+url+'","'+finalIP+'");')
-    cursor.execute('SELECT * FROM Cache;')
-    records = cursor.fetchall()
-    return finalIP
+        cursor.execute('INSERT INTO Cache VALUES ("'+url+'","'+finalIP+'");')
+        cursor.execute('SELECT * FROM Cache;')
+        records = cursor.fetchall()
+        return finalIP
+    except:
+        print("Cannot find IP address for URL "+url+"!!!!")
+
 
 def recursiveDNSResolution(url,location):
-    splitURL = url.split('.')
-    cursor.execute('SELECT * FROM Cache WHERE urlName = "'+url+'";')
-    records = cursor.fetchall()
-    if(not records):
-       print("Cannot find IP in Cache Server!!!Now looking in Root Name Server")
-    return recursiveRNSCall(splitURL[-1],splitURL[-2],url)
+    try:
+        splitURL = url.split('.')
+        cursor.execute('SELECT * FROM Cache WHERE urlName = "'+url+'";')
+        records = cursor.fetchall()
+        if(not records):
+            print("Cannot find IP in Cache Server!!!Now looking in Root Name Server")
+        return recursiveRNSCall(splitURL[-1],splitURL[-2],url)
+    except :
+        print("Cannot find IP address for URL "+url+"!!!!")
         
 
 def recursiveRNSCall(tld,dom,url):
