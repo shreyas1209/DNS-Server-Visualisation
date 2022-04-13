@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS TLDNameServers (
 	nameServer VARCHAR(50) NOT NULL,
     tldIP VARCHAR(16) NOT NULL,
     ansIP VARCHAR(16) NOT NULL,
-    location VARCHAR(20) NOT NULL,
+    loct VARCHAR(20) NOT NULL,
     PRIMARY KEY(ansIP,tldIP),
     FOREIGN KEY(tldIP) REFERENCES rootNameServer(tldIP)
 );
@@ -34,12 +34,13 @@ CREATE TABLE IF NOT EXISTS TLDNameServers (
 CREATE TABLE IF NOT EXISTS AuthoritativeNameServers (
     ansIP VARCHAR(16) NOT NULL,
 	ipv4 VARCHAR(16) PRIMARY KEY,
-    urlName VARCHAR(20) NOT NULL
+    urlName VARCHAR(20) NOT NULL,
+    FOREIGN KEY(ansIP) REFERENCES TLDNameServers(ansIP)
 );
 
 CREATE TABLE IF NOT EXISTS Cache(
     urlName VARCHAR(20) NOT NULL,
-    ipv4 VARCHAR(16) 
+    ipv4 VARCHAR(16) PRIMARY KEY
 );
 
 INSERT INTO org VALUES
@@ -130,7 +131,7 @@ CREATE DEFINER =`scott`@`localhost` PROCEDURE
  DETERMINISTIC
  SQL SECURITY INVOKER
 BEGIN
-select ansIP into ans_IP from TLDNameServers where tldIP=tld_IP AND location=loc;
+select ansIP into ans_IP from TLDNameServers where tldIP=tld_IP AND loct=loc;
 END$$
 DELIMITER ;
 
@@ -145,6 +146,8 @@ select ipv4 from AuthoritativeNameServers where (ansIP=ans_IP AND urlName=dom);
 END$$
 DELIMITER ;
 call iterative_resolver(".org","khanacademy","us");
+
+SET max_sp_recursion_depth=100;
 
 DELIMITER $$
 CREATE DEFINER =`scott`@`localhost` PROCEDURE 
@@ -178,7 +181,7 @@ CREATE DEFINER =`scott`@`localhost` PROCEDURE
  DETERMINISTIC
  SQL SECURITY INVOKER
 BEGIN
-select ansIP into ans_IP from TLDNameServers where tldIP=tld_IP AND location=loc;	
+select ansIP into ans_IP from TLDNameServers where (loct=loc AND tldIP=tld_IP) ;	
 call rec_ans(ans_IP, dom);
 END$$
 DELIMITER ;
@@ -190,11 +193,7 @@ CREATE DEFINER =`scott`@`localhost` PROCEDURE
  DETERMINISTIC
  SQL SECURITY INVOKER
 BEGIN
-select ipv4 from AuthoritativeNameServers where urlName=dom;	
-call rec_ans(ans_IP, dom);
+select ipv4 from AuthoritativeNameServers where urlName=dom AND ansIP=ans_IP;	
 END$$
 DELIMITER ;
-
-
-
-
+call recursive_resolver('.com', 'google', 'us');
