@@ -69,7 +69,6 @@ def iterativeDNSResolver(url,loc):
     cursor.execute('INSERT INTO Cache VALUES ("'+url+'","'+finalIP+'");')
     cursor.execute('SELECT * FROM Cache;')
     records = cursor.fetchall()
-    print(records)
     return finalIP
 
 def recursiveDNSResolution(url,location):
@@ -131,8 +130,8 @@ def connect():
     try:
         global myDB
         myDB = mysql.connector.connect(host = 'localhost',
-                                            username = 'scott',
-                                            password = 'tiger',
+                                            username = 'SCOTT',
+                                            password = 'TIGER',
                                             autocommit=True
                                             )
         if myDB.is_connected():
@@ -172,7 +171,9 @@ def connect():
     except mysql.connector.Error as e:
         print("Error while connecting to MySQL", e)
 def close():
+        
         if myDB.is_connected():
+            cursor.execute('DROP TABLE IF EXISTS CACHE;')
             cursor.close()
             myDB.close()
             print("MySQL connection is closed")
