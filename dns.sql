@@ -25,8 +25,9 @@ CREATE TABLE IF NOT EXISTS rootNameServer (
 CREATE TABLE IF NOT EXISTS TLDNameServers ( 
 	nameServer VARCHAR(50) NOT NULL,
     tldIP VARCHAR(16) NOT NULL,
-    ansIP VARCHAR(16) PRIMARY KEY,
+    ansIP VARCHAR(16) NOT NULL,
     location VARCHAR(20) NOT NULL,
+    PRIMARY KEY(ansIP,tldIP),
     FOREIGN KEY(tldIP) REFERENCES rootNameServer(tldIP)
 );
 
@@ -44,7 +45,7 @@ CREATE TABLE IF NOT EXISTS Cache(
 INSERT INTO org VALUES
 ("NationalInternetExchangeofIndia", "country"),
 ("PublicInterestRegistry", "generic"),
-("EDUCAUSE","sponsored");
+("EDUCAUSE","sponsored"),
 ("VeriSignGlobalRegistryServices","generic");
 
 INSERT INTO rootNameServer VALUES 
@@ -58,7 +59,7 @@ INSERT INTO tldNameServers VALUES
 ("a0.org.afilias-nst.info", "45.333.233.12", "192.29.56.5", "southPacific"), 
 ("b0.org.afilias-nst.org", "45.333.233.12", "199.19.54.1", "us" ),
 ("ns6.registry.in","232.154.567.45", "156.154.101.34", "india" ),
-("ns4.registry.in","232.154.567.45","37.209.198.12","us",),
+("ns4.registry.in","232.154.567.45","37.209.198.12","us"),
 ("c.edu-servers.net","345.22.45.993", "192.26.92.450", "africa"),
 ("d.edu-servers.net","345.22.45.993", "192.31.80.30", "china"),
 ("a.gtld-servers.net", "445.4.44.23","192.5.6.30","europe"),
